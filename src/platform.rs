@@ -4,11 +4,14 @@ use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 use x11rb::wrapper::ConnectionExt as _;
+use crate::logger::*;
+use crate::{info, log_output};
 
 struct InternalState
 {
     connection: RustConnection,
     window: u32,
+    graphics_context: u32,
     screen: Screen,
     wm_protocol: u32,
     wm_delete_win: u32,
@@ -26,11 +29,13 @@ impl InternalState
         let (conn, screen_num) = x11rb::connect(None).expect("Failed to connect");
         let screen = &conn.setup().roots[screen_num];
         let win_id = conn.generate_id().expect("failed to get window id");
+        let gc_id = conn.generate_id().expect("failed to get gc id");
 
         Self
         {
             window: win_id,
             screen: screen.clone(),
+            graphics_context: gc_id,
             connection: conn,
             wm_protocol: 0,
             wm_delete_win: 0,
@@ -59,10 +64,20 @@ impl PlatformState
         height: u16,
     ) -> bool
     {
+        //get state from struct
         let screen = &self.internal_state.screen;
         let conn = &self.internal_state.connection;
-        let win_id = &self.internal_state.window;
+        let gc_id = &self.internal_state.graphics_context;
 
+        //create graphics context to draw to foreground
+        let gc_win = screen.root;
+        let values = CreateGCAux::default()
+            .foreground(screen.white_pixel)
+            .graphics_exposures(0);
+        conn.create_gc(*gc_id, gc_win, &values).expect("Failed creating a grapics context");
+
+        //create window
+        let win_id = &self.internal_state.window;
         let values = CreateWindowAux::default()
             .background_pixel(screen.black_pixel)
             .event_mask(EventMask::BUTTON_PRESS 
@@ -87,6 +102,7 @@ impl PlatformState
             &values,
         ).expect("Window Creation Failed");
 
+        //set window name and icon name
         conn.change_property8(
             PropMode::REPLACE,
             *win_id,
@@ -103,6 +119,7 @@ impl PlatformState
             app_name.as_bytes(),
         ).unwrap();
 
+        //sends a message if the window is asked to close
         let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
         let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
 
@@ -117,17 +134,12 @@ impl PlatformState
             &[wm_delete_window],
         ).unwrap();
 
+        //set the atoms
         self.internal_state.wm_protocol = wm_protocols;
         self.internal_state.wm_delete_win = wm_delete_window;
 
         conn.map_window(*win_id).expect("Map Window Error");
         conn.flush().unwrap();
-
-        // match conn.flush()
-        // {
-        //     Ok(_) => (),
-        //     Err(err) => eprintln!("Error flushing: {:?}", err) 
-        // }
 
         return true;
     }
@@ -155,7 +167,7 @@ impl PlatformState
                 Event::ClientMessage(event) => {
                     if event.data.as_data32()[0] == self.internal_state.wm_delete_win 
                     {
-                        println!("Window was asked to close");
+                        info!("Window was asked to close");
                         quit = true;
                         return !quit;
                     }
@@ -164,15 +176,5 @@ impl PlatformState
             }
             return !quit;
         }
-    }
-
-    fn platform_console_write(message: String)
-    {
-        println!("{}", message);
-    }
-
-    fn platform_console_write_error(message: String)
-    {
-        println!("{}", message);
     }
 }

@@ -1,6 +1,7 @@
 use platform::PlatformState;
 
 mod platform;
+mod logger;
 
 fn main()
 {
