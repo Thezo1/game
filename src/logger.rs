@@ -45,7 +45,7 @@ pub mod macros
                 let level = get_level_string($name);
                 let color = get_level_color($name);
                 let msg = format!($msg, $($arg),*);
-                panic!("\x1b[1;{}m[{}]: {}\x1b[0m",color, level, msg);
+                println!("\x1b[1;{}m[{}]: {}\x1b[0m",color, level, msg);
             }
         };
 
