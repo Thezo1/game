@@ -1,16 +1,15 @@
-use platform::PlatformState;
+use platform::*;
+use application::*;
 
 mod platform;
 mod logger;
+mod application;
 
 fn main()
 {
+    let app_config = AppConfig::new("test", 100, 100, 1200, 700);
     let mut platform = PlatformState::new();
-    if platform.platform_startup("test", 0, 0, 100, 100)
-    {
-        while platform.platform_pump_message()
-        {
-        }
-    }
-    platform.platform_shutdown();
+
+    let app = App::create(&mut platform, app_config).unwrap();
+    app.run();
 }

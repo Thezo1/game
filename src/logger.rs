@@ -120,11 +120,4 @@ pub mod macros
             log_output!(LogLevel::LogLevelTrace, $msg)
         }
     }
-
-   //LogLevelFatal,
-   //LogLevelError,
-   //LogLevelWarn,
-   //LogLevelInfo,
-   //LogLevelDebug,
-   //LogLevelTrace,
 }
