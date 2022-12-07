@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 #vulkano = "0.32.1"
-x11rb = "0.10.1"
+x11rb = {version = "0.10.1", features = ["image"]}

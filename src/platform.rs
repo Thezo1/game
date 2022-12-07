@@ -6,6 +6,7 @@ use x11rb::COPY_DEPTH_FROM_PARENT;
 use x11rb::wrapper::ConnectionExt as _;
 use crate::logger::*;
 use crate::{info, log_output};
+use crate::application::AppConfig;
 
 struct InternalState
 {
@@ -55,14 +56,7 @@ impl PlatformState
     }
 
 
-    pub fn platform_startup(
-        &mut self,
-        app_name: &str,
-        x: i16,
-        y: i16,
-        width: u16,
-        height: u16,
-    ) -> bool
+    pub fn platform_startup(&mut self, app_config: &AppConfig) -> bool
     {
         //get state from struct
         let screen = &self.internal_state.screen;
@@ -75,6 +69,16 @@ impl PlatformState
             .foreground(screen.white_pixel)
             .graphics_exposures(0);
         conn.create_gc(*gc_id, gc_win, &values).expect("Failed creating a grapics context");
+
+        //create pixmap
+        let pid = conn.generate_id().unwrap();
+        conn.create_pixmap(
+            screen.root_depth,
+            pid,
+            screen.root,
+            600,
+            800,
+        ).unwrap();
 
         //create window
         let win_id = &self.internal_state.window;
@@ -92,10 +96,10 @@ impl PlatformState
             COPY_DEPTH_FROM_PARENT,
             *win_id,
             screen.root,
-            x,
-            y,
-            width,
-            height,
+            app_config.x,
+            app_config.y,
+            app_config.width,
+            app_config.height,
             0,
             WindowClass::INPUT_OUTPUT,
             screen.root_visual,        
@@ -108,7 +112,7 @@ impl PlatformState
             *win_id,
             AtomEnum::WM_NAME,
             AtomEnum::STRING,
-            app_name.as_bytes(),
+            app_config.app_name.as_bytes(),
         ).expect("Error changing name");
 
         conn.change_property8(
@@ -116,7 +120,7 @@ impl PlatformState
             *win_id,
             AtomEnum::WM_ICON_NAME,
             AtomEnum::STRING,
-            app_name.as_bytes(),
+            app_config.app_name.as_bytes(),
         ).unwrap();
 
         //sends a message if the window is asked to close
@@ -149,7 +153,7 @@ impl PlatformState
         self.internal_state.connection.destroy_window(self.internal_state.window).expect("Error destroying window");    
     }
 
-    pub fn platform_pump_message(&mut self) -> bool
+    pub fn platform_pump_message(&self) -> bool
     {
         let mut quit = false;
         loop
