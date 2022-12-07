@@ -10,12 +10,14 @@ pub enum ErrorApp
     AppCreateError
 }
 
+#[derive(Debug)]
 pub struct App<'a, 'b>
 {
     pub app_config: AppConfig<'b>,
     app_state: AppState<'a>,
 }
 
+#[derive(Debug)]
 pub struct AppConfig<'b>
 {
     pub app_name: &'b str,
@@ -25,6 +27,7 @@ pub struct AppConfig<'b>
     pub height: u16,
 }
 
+#[derive(Debug)]
 pub struct AppState<'a>
 {
     is_running: bool,
