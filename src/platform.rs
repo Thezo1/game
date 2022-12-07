@@ -8,6 +8,7 @@ use crate::logger::*;
 use crate::{info, log_output};
 use crate::application::AppConfig;
 
+#[derive(Debug)]
 struct InternalState
 {
     connection: RustConnection,
@@ -18,6 +19,7 @@ struct InternalState
     wm_delete_win: u32,
 }
 
+#[derive(Debug)]
 pub struct PlatformState
 {
     internal_state: InternalState,
