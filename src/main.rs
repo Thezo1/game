@@ -4,6 +4,7 @@ use application::*;
 mod platform;
 mod logger;
 mod application;
+mod events;
 
 fn main()
 {
