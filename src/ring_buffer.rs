@@ -20,15 +20,14 @@ impl<T: Copy> Buffer<T>
 
     pub fn push_back(&mut self, value: T) -> bool
     {
-        assert!((self.tail + 1)%MAXBUFFERSIZE != self.head);
-        if self.tail>=MAXBUFFERSIZE
+        if (self.tail + 1)%MAXBUFFERSIZE == self.head
         {
             error!("Buffer size exceeded");
             return false;
         }
 
         self.entries[self.tail] = Some(value);
-        self.tail+=(self.tail + 1)%MAXBUFFERSIZE;
+        self.tail = (self.tail + 1)%MAXBUFFERSIZE;
         true
     }
 
@@ -43,18 +42,39 @@ impl<T: Copy> Buffer<T>
 
         let on_event = self.entries[self.head];
         self.entries[self.head] = None;
-        self.head+=(self.head+1)%MAXBUFFERSIZE;
+        self.head = (self.head+1)%MAXBUFFERSIZE;
         on_event
     }
 }
 
+fn on_event(code: u8){}
+
 #[cfg(test)]
 mod tests
 {
-    use crate::test::*;
+    use crate::test;
     use super::*;
     #[test]
     fn build_works()
     {
+        let mut buffer = Buffer::new();
+
+        buffer.push_back(test::on_event as fn(u8));
+        buffer.push_back(on_event as fn(u8));
+        assert_ne!(buffer.entries[0].unwrap(), buffer.entries[1].unwrap());
+    }
+
+    #[test]
+    fn pop_works()
+    {
+        let mut buffer = Buffer::new();
+        buffer.push_back(test::on_event as fn(u8));
+        buffer.push_back(on_event as fn(u8));
+
+        buffer.pop_front();
+        buffer.pop_front();
+        assert_eq!(buffer.entries[0], None);
+        assert_eq!(buffer.head, 2);
+        assert_eq!(buffer.tail, 2);
     }
 }
