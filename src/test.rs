@@ -1,5 +1,9 @@
-pub type Callback = fn(u8);
+use crate::events::*;
 
-pub fn on_event(code: u8){}
+pub struct Test;
 
-pub fn second_on_event(code: u8){}
+impl Sender for Test{}
+
+pub fn on_event(code: u8)
+{
+}
