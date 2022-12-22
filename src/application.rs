@@ -33,9 +33,9 @@ pub struct AppState<'a>
     is_running: bool,
     is_suspeded: bool,
     plat_state: &'a PlatformState,
-    width: i16,
-    height: i16,
-    last_time: f64,
+    _width: i16,
+    _height: i16,
+    _last_time: f64,
 }
 
 impl<'b> AppConfig<'b>
@@ -55,9 +55,9 @@ impl<'a> AppState<'a>
             is_running: true, 
             is_suspeded: false,
             plat_state,
-            width: 100,
-            height: 100,
-            last_time: 0.
+            _width: 100,
+            _height: 100,
+            _last_time: 0.
         };
     }
 }
@@ -74,11 +74,6 @@ impl<'a, 'b> App<'a, 'b>
                 error!("Create Application called more than once");
                 return Err(ErrorApp::AppCreateError);
             }
-
-            /* initialize subsystems here
-
-            */
-
 
             if !plat_state.platform_startup(&app_config)
             {
