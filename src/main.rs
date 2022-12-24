@@ -1,15 +1,12 @@
-use platform::*;
-use application::*;
+use crate::app::*;
 
-mod platform;
 mod logger;
-mod application;
 mod test;
+mod app;
 
 fn main()
 {
-    let app_config = AppConfig::new("test", 100, 100, 1200, 700);
-    let mut platform = PlatformState::new();
-    let app = App::create(&mut platform, app_config).unwrap();
+    let app_config = AppConfig::default();
+    let mut app = App::new(app_config).unwrap();
     app.run();
 }
