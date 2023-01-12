@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 libc = "0.2.139"
-vulkano = "0.32.1"
-x11rb = "0.10.1"
+sysinfo = "0.27.1"
+# vulkano = "0.32.1"
+x11rb = {version = "0.10.1", features = ["image"]}
+# image_parser = {path = "../tool-box/image_parser/"}

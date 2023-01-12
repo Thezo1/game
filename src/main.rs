@@ -4,9 +4,9 @@ mod logger;
 mod test;
 mod app;
 
-fn main()
+fn main() -> Result<(), Box<dyn std::error::Error>>
 {
-    let app_config = AppConfig::default();
-    let mut app = App::new(app_config).unwrap();
-    app.run();
+    Platform::new()
+        .run()?;
+    Ok(())
 }
